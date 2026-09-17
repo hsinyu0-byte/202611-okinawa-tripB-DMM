@@ -252,6 +252,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // 預設 DMM 版本行程資料庫
         const defaultTripData = {
             "Day 1 (10/31)": [
                 { id: "101", time: "21:00", duration: "45 分鐘", name: "抵達那霸機場", note: "辦理入境與提領行李（約 30–45 分鐘）", mapUrl: "https://www.google.com/maps/search/?api=1&query=沖繩縣那霸市鏡水150" },
@@ -362,7 +363,15 @@
         function renderTabs() {
             const tabsContainer = document.getElementById('day-tabs');
             tabsContainer.innerHTML = '';
-            Object.keys(tripData).forEach(day => {
+            
+            // 嚴格依 Day 1 ~ Day 6 數字排序頁籤
+            const sortedDays = Object.keys(tripData).sort((a, b) => {
+                const numA = parseInt(a.match(/\d+/)?.[0] || 0);
+                const numB = parseInt(b.match(/\d+/)?.[0] || 0);
+                return numA - numB;
+            });
+
+            sortedDays.forEach(day => {
                 const btn = document.createElement('button');
                 btn.className = `px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold whitespace-nowrap transition ${
                     day === currentDay ? 'bg-sky-600 text-white shadow' : 'bg-white text-slate-600 hover:bg-slate-200'
@@ -377,6 +386,8 @@
             document.getElementById('current-day-title').innerText = `${currentDay} 行程`;
             const listContainer = document.getElementById('spots-list');
             listContainer.innerHTML = '';
+
+            if (!tripData[currentDay]) return;
 
             tripData[currentDay].forEach((spot) => {
                 const card = document.createElement('div');
